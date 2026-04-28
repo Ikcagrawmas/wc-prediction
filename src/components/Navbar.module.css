@@ -1,0 +1,132 @@
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: linear-gradient(to bottom, rgba(10,8,6,0.97) 0%, rgba(10,8,6,0.92) 100%);
+  backdrop-filter: blur(16px);
+  /* Stronger gold divider line */
+  border-bottom: 1px solid rgba(201,168,76,0.28);
+  box-shadow: 0 1px 0 rgba(201,168,76,0.08), 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 clamp(20px,5vw,60px);
+  height: 68px;  /* slightly taller for presence */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Brand block — enlarged */
+.brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  gap: 2px;
+  text-decoration: none;
+}
+
+.wp {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;   /* up from 18px */
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--gold-bright);
+  text-shadow: 0 0 20px rgba(201,168,76,0.3);
+  transition: text-shadow 0.2s;
+}
+
+.brand:hover .wp {
+  text-shadow: 0 0 30px rgba(201,168,76,0.6);
+}
+
+.performance {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  color: rgba(201,168,76,0.55);  /* slightly warmer than white-muted */
+  text-transform: uppercase;
+}
+
+/* Nav right */
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Leaderboard link */
+.leaderboardLink {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  padding: 4px 0;
+  position: relative;
+}
+
+.leaderboardLink::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transition: transform 0.2s;
+}
+
+.leaderboardLink:hover,
+.leaderboardLink.active {
+  color: var(--gold);
+}
+
+.leaderboardLink:hover::after,
+.leaderboardLink.active::after {
+  transform: scaleX(1);
+}
+
+/* Back link */
+.backLink {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--white-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.backLink:hover { color: var(--gold-dim); }
+
+/* CTA button */
+.cta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--black);
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold), var(--gold-bright));
+  padding: 9px 22px;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 12px rgba(201,168,76,0.2);
+}
+
+.cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 24px rgba(201,168,76,0.45);
+}
+
+@media (max-width: 480px) {
+  .cta { font-size: 11px; padding: 8px 14px; }
+  .wp  { font-size: 18px; }
+  .inner { height: 60px; }
+}

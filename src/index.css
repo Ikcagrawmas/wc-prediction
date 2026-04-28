@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
+
+:root {
+  --burgundy: #6B1A2A;
+  --burgundy-deep: #3D0A14;
+  --burgundy-light: #8B2A3E;
+  --black: #0A0806;
+  --black-mid: #12100D;
+  --black-surface: #1A1512;
+  --black-elevated: #231F1B;
+  --gold: #C9A84C;
+  --gold-bright: #E8C46A;
+  --gold-dim: #8A6F2E;
+  --gold-pale: #F5E4B3;
+  --white: #F7F3ED;
+  --white-dim: #C8BFB5;
+  --white-muted: #7A7066;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-condensed: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Barlow', 'Helvetica Neue', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+#root { position: relative; z-index: 1; }
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 60px);
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--burgundy); border-radius: 3px; }
+*:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+input, textarea, select { font-family: var(--font-body); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 20px rgba(201,168,76,0.2); }
+  50% { box-shadow: 0 0 40px rgba(201,168,76,0.5); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes borderGlow {
+  0%, 100% { border-color: var(--gold-dim); }
+  50% { border-color: var(--gold-bright); }
+}

@@ -1,0 +1,88 @@
+.guide {
+  background: rgba(61, 10, 20, 0.25);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 3px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pts {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  min-width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+  color: var(--gold-dim);
+}
+
+.ptsHigh {
+  color: var(--gold-bright);
+}
+
+.ptsMid {
+  color: var(--gold);
+}
+
+.ptsZero {
+  color: var(--white-muted);
+  font-weight: 600;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--white-dim);
+  font-family: 'Barlow', sans-serif;
+  line-height: 1.4;
+}
+
+.note {
+  font-size: 11px;
+  color: var(--white-muted);
+  font-style: italic;
+  line-height: 1.5;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 600px) {
+  .guide {
+    padding: 12px 14px;
+  }
+}

@@ -1,0 +1,165 @@
+.row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+.row:last-child { border-bottom: none; }
+.row:hover { background: rgba(255,255,255,0.02); }
+.row.filled { background: rgba(201,168,76,0.02); }
+.row.completed { background: rgba(0,0,0,0.15); }
+
+.matchNum { display: flex; align-items: center; justify-content: center; }
+.mNum { font-size: 10px; color: rgba(201,168,76,0.3); font-family: 'Barlow Condensed',sans-serif; font-weight: 700; }
+
+.teamName {
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--white-dim); transition: color 0.15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.teamName.home { text-align: right; }
+.teamName.away { text-align: left; }
+.teamName.winner { color: var(--gold-bright); }
+
+/* ── Score block ── */
+.scoreBlock { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+/* Editable inputs */
+.scoreInput {
+  width: 44px; height: 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 3px;
+  color: var(--white);
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 18px; font-weight: 700; text-align: center;
+  -moz-appearance: textfield; transition: border-color 0.15s, background 0.15s;
+}
+.scoreInput::-webkit-outer-spin-button,
+.scoreInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+.scoreInput::placeholder { color: rgba(255,255,255,0.12); font-size: 16px; }
+.scoreInput:focus { outline: none; border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.scoreInput.winInput { border-color: rgba(201,168,76,0.5); color: var(--gold-bright); }
+.scoreInput.locked { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06); color: var(--white-muted); cursor: not-allowed; }
+
+.vs { font-size: 13px; color: var(--white-muted); font-family: 'Barlow Condensed',sans-serif; flex-shrink: 0; }
+.drawVs { color: var(--gold-dim); }
+
+/* ── Completed score overlay ── */
+.completedScores {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 100px;
+  text-align: center;
+}
+.predRow, .actualRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.predLabel, .actualLabel {
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; flex-shrink: 0; min-width: 42px; text-align: right;
+}
+.predLabel { color: var(--white-muted); }
+.actualLabel { color: rgba(201,168,76,0.6); }
+.predScore {
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 14px; font-weight: 600; color: var(--white-dim); letter-spacing: 0.04em;
+}
+.actualScore {
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--gold-bright); letter-spacing: 0.04em;
+}
+
+/* ── Right column ── */
+.rightCol { min-width: 90px; display: flex; justify-content: flex-end; }
+
+/* Points badge */
+.ptsBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 3px;
+  min-width: 72px;
+  border: 1px solid transparent;
+}
+.ptsNum {
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 17px; font-weight: 900; line-height: 1; letter-spacing: 0.02em;
+}
+.ptsLabel {
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; margin-top: 1px; opacity: 0.8;
+}
+
+/* Tier colors */
+.pts_gold   { background: rgba(201,168,76,0.15); border-color: rgba(201,168,76,0.4); }
+.pts_gold .ptsNum { color: var(--gold-bright); }
+.pts_gold .ptsLabel { color: var(--gold-dim); }
+
+.pts_green  { background: rgba(80,180,100,0.12); border-color: rgba(80,180,100,0.3); }
+.pts_green .ptsNum { color: #6bca80; }
+.pts_green .ptsLabel { color: rgba(107,202,128,0.7); }
+
+.pts_yellow { background: rgba(220,190,80,0.12); border-color: rgba(220,190,80,0.3); }
+.pts_yellow .ptsNum { color: #dcbe50; }
+.pts_yellow .ptsLabel { color: rgba(220,190,80,0.7); }
+
+.pts_gray   { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+.pts_gray .ptsNum { color: var(--white-muted); }
+.pts_gray .ptsLabel { color: rgba(255,255,255,0.3); }
+
+.pts_red    { background: rgba(200,80,80,0.08); border-color: rgba(200,80,80,0.2); }
+.pts_red .ptsNum { color: rgba(220,100,100,0.8); }
+.pts_red .ptsLabel { color: rgba(220,100,100,0.5); }
+
+/* Kickoff meta */
+.meta { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.metaDate { font-size: 11px; color: var(--white-muted); font-family: 'Barlow Condensed',sans-serif; }
+.metaTime { font-size: 10px; color: rgba(201,168,76,0.5); font-family: 'Barlow Condensed',sans-serif; }
+.metaVenue { font-size: 10px; color: rgba(255,255,255,0.2); font-family: 'Barlow Condensed',sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+
+@media (max-width: 600px) {
+  .row { grid-template-columns: 24px 1fr auto 1fr; gap: 6px; padding: 8px; }
+  .rightCol { display: none; }
+  .scoreInput { width: 38px; height: 34px; font-size: 16px; }
+  .teamName { font-size: 13px; }
+  .completedScores { min-width: 80px; }
+}
+
+/* ── Enhanced glow on exact score badge ─────────────────────────────── */
+.pts_gold {
+  box-shadow: 0 0 12px rgba(201,168,76,0.25), inset 0 0 8px rgba(201,168,76,0.08);
+  animation: goldPulse 2.5s ease-in-out infinite;
+}
+@keyframes goldPulse {
+  0%,100% { box-shadow: 0 0 12px rgba(201,168,76,0.25); }
+  50%      { box-shadow: 0 0 22px rgba(201,168,76,0.5), inset 0 0 10px rgba(201,168,76,0.1); }
+}
+
+/* ── Stronger zero contrast ─────────────────────────────────────────── */
+.pts_red {
+  background: rgba(160,50,50,0.15) !important;
+  border-color: rgba(180,60,60,0.35) !important;
+}
+.pts_red .ptsNum { color: rgba(220,90,90,0.9) !important; }
+
+/* ── Match row hover ─────────────────────────────────────────────────── */
+.row { transition: background 0.15s, box-shadow 0.15s; }
+.row:hover { background: rgba(255,255,255,0.025) !important; box-shadow: inset 2px 0 0 rgba(201,168,76,0.2); }
+
+/* ── Result reason micro-labels ──────────────────────────────────────── */
+/* Already in ptsLabel — just ensure visibility */
+.pts_gold .ptsLabel   { opacity: 1; font-weight: 700; }
+.pts_green .ptsLabel  { opacity: 0.9; }

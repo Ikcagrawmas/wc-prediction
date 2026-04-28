@@ -1,0 +1,83 @@
+.panel {
+  background: var(--black-surface);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-left: 3px solid var(--gold);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(201,168,76,0.06);
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+}
+
+.panelTitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.panelSub {
+  font-size: 12px;
+  color: var(--white-muted);
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+.cells {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.cell {
+  flex: 1;
+  min-width: 100px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-right: 1px solid rgba(255,255,255,0.04);
+}
+
+.cell:last-child { border-right: none; }
+
+.accentCell {
+  background: rgba(201,168,76,0.06);
+}
+
+.cellNum {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--white-dim);
+  line-height: 1;
+}
+
+.accentNum { color: var(--gold-bright); font-size: 28px; }
+
+.cellLabel {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--white-muted);
+}
+
+.cellTag {
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .cells { flex-wrap: wrap; }
+  .cell { min-width: 50%; border-bottom: 1px solid rgba(255,255,255,0.04); }
+}

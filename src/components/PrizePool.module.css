@@ -1,0 +1,216 @@
+.section {
+  padding: clamp(80px, 12vw, 140px) 0;
+  background: linear-gradient(180deg, var(--black) 0%, var(--black-mid) 50%, var(--black) 100%);
+  position: relative;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(107, 26, 42, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 60px);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.title em {
+  font-style: italic;
+  color: var(--gold-bright);
+}
+
+.divider {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto 24px;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--white-dim);
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.board {
+  background: var(--black-surface);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: opacity 0.3s;
+}
+
+.board.flash {
+  animation: flashBoard 0.6s ease;
+}
+
+@keyframes flashBoard {
+  0% { border-color: rgba(201, 168, 76, 0.2); }
+  30% { border-color: rgba(201, 168, 76, 0.7); box-shadow: 0 0 30px rgba(201, 168, 76, 0.2); }
+  100% { border-color: rgba(201, 168, 76, 0.2); }
+}
+
+.boardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(201, 168, 76, 0.06);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+}
+
+.liveTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+.liveDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(201, 168, 76, 0); }
+}
+
+.boardTitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--white-muted);
+  flex: 1;
+}
+
+.updating {
+  font-size: 11px;
+  color: var(--white-muted);
+  font-style: italic;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.accentRow {
+  background: rgba(201, 168, 76, 0.04);
+}
+
+.totalRow {
+  border-top: 1px solid rgba(201, 168, 76, 0.25);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  padding: 18px 24px;
+  background: rgba(107, 26, 42, 0.15) !important;
+}
+
+.rowLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.labelText {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--white-dim);
+}
+
+.totalRow .labelText {
+  color: var(--white);
+  font-size: 16px;
+}
+
+.labelSub {
+  font-size: 11px;
+  color: var(--white-muted);
+  letter-spacing: 0.05em;
+}
+
+.rowValue {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--white-dim);
+  text-align: right;
+}
+
+.accentValue {
+  color: var(--gold-bright);
+  font-size: 22px;
+}
+
+.totalRow .rowValue {
+  font-size: 26px;
+}
+
+.note {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--white-muted);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .row {
+    padding: 12px 16px;
+  }
+  .boardHeader {
+    padding: 12px 16px;
+  }
+}
