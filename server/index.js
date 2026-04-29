@@ -779,6 +779,159 @@ app.get('/api/admin/scoring-summary', requireAdmin, async (req, res) => {
   }
 })
 
+// ─── GET /api/admin/ko-scoring-overview ──────────────────────────────────────
+// Admin view: per-slot breakdown of correct/incorrect/missing picks across all users
+app.get('/api/admin/ko-scoring-overview', requireAdmin, async (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  try {
+    const { data: akr } = await serviceClient
+      .from('actual_knockout_results')
+      .select('round, slot, winner_name, home_team, away_team')
+      .not('winner_name', 'is', null)
+      .order('round').order('slot')
+
+    if (!akr?.length) return res.json({ slots: [] })
+
+    const ROUND_LABELS = { r32:'Round of 32', r16:'Round of 16', qf:'Quarterfinals', sf:'Semifinals', final:'Final' }
+    const ROUND_ORDER  = ['r32','r16','qf','sf','final']
+    const { count: paidCount } = await serviceClient.from('users').select('*',{count:'exact',head:true}).eq('paid',true)
+
+    const slots = []
+    for (const actual of akr) {
+      const { data: ks } = await serviceClient
+        .from('knockout_scores')
+        .select('correct')
+        .eq('round', actual.round)
+        .eq('slot', actual.slot)
+
+      const correct_picks   = (ks||[]).filter(r => r.correct).length
+      const incorrect_picks = (ks||[]).filter(r => !r.correct).length
+      const no_picks        = Math.max(0, (paidCount||0) - correct_picks - incorrect_picks)
+
+      slots.push({
+        round:          actual.round,
+        round_label:    ROUND_LABELS[actual.round] || actual.round,
+        slot:           actual.slot,
+        home:           actual.home_team || '?',
+        away:           actual.away_team || '?',
+        winner:         actual.winner_name,
+        correct_picks,
+        incorrect_picks,
+        no_picks,
+      })
+    }
+
+    slots.sort((a,b) => ROUND_ORDER.indexOf(a.round) - ROUND_ORDER.indexOf(b.round) || a.slot.localeCompare(b.slot))
+    return res.json({ slots })
+  } catch (err) {
+    console.error('[admin/ko-scoring-overview]', err.message)
+    return res.status(500).json({ error: err.message })
+  }
+})
+
+// ─── GET /api/user-ko-breakdown ──────────────────────────────────────────────
+// Per-slot knockout scoring detail for a user: their pick, actual winner, points, status
+app.get('/api/user-ko-breakdown', async (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  const { user_id } = req.query
+  if (!user_id) return res.status(400).json({ error: 'user_id required' })
+
+  try {
+    // 1. All actual KO results entered by admin
+    const { data: actualResults } = await serviceClient
+      .from('actual_knockout_results')
+      .select('round, slot, winner_name, home_team, away_team')
+
+    if (!actualResults?.length) {
+      return res.json({ breakdown: [], summary: { total: 0, correct: 0, incorrect: 0, pending: 0, koPoints: 0 } })
+    }
+
+    // 2. User's KO scores for these slots
+    const { data: koScores } = await serviceClient
+      .from('knockout_scores')
+      .select('round, slot, points, correct')
+      .eq('user_id', user_id)
+
+    const scoreBySlot = {}
+    for (const s of (koScores || [])) scoreBySlot[`${s.round}|${s.slot}`] = s
+
+    // 3. User's KO predictions (to show what they picked even if unscored)
+    const { data: koPreds } = await serviceClient
+      .from('knockout_predictions')
+      .select('round, slot, team_id')
+      .eq('user_id', user_id)
+
+    // Get team names for prediction team_ids
+    const teamIds = [...new Set((koPreds || []).map(p => p.team_id).filter(Boolean))]
+    const teamNameById = {}
+    if (teamIds.length) {
+      const { data: teams } = await serviceClient.from('teams').select('id, name').in('id', teamIds)
+      for (const t of (teams || [])) teamNameById[t.id] = t.name
+    }
+
+    const predBySlot = {}
+    for (const p of (koPreds || [])) {
+      predBySlot[`${p.round}|${p.slot}`] = teamNameById[p.team_id] || null
+    }
+
+    // Round display order and labels
+    const ROUND_ORDER  = ['r32','r16','qf','sf','final']
+    const ROUND_LABELS = { r32:'Round of 32', r16:'Round of 16', qf:'Quarterfinals', sf:'Semifinals', final:'Final' }
+    const KO_POINTS    = { r32:3, r16:5, qf:5, sf:8, final:15 }
+
+    // 4. Build breakdown rows
+    const breakdown = []
+    for (const actual of actualResults) {
+      const key       = `${actual.round}|${actual.slot}`
+      const userPick  = predBySlot[key] || null
+      const scoreRow  = scoreBySlot[key]
+
+      let status = 'no_pick'
+      let points = 0
+      if (scoreRow) {
+        status = scoreRow.correct ? 'correct' : 'incorrect'
+        points = scoreRow.points || 0
+      } else if (userPick) {
+        status = 'pending'  // pick exists but not yet scored
+      }
+
+      breakdown.push({
+        round:        actual.round,
+        round_label:  ROUND_LABELS[actual.round] || actual.round,
+        slot:         actual.slot,
+        home_team:    actual.home_team || '?',
+        away_team:    actual.away_team || '?',
+        user_pick:    userPick,
+        actual_winner: actual.winner_name,
+        points,
+        status,
+        pts_possible: KO_POINTS[actual.round] || 0,
+      })
+    }
+
+    // Sort by round order, then slot
+    breakdown.sort((a, b) => {
+      const ri = ROUND_ORDER.indexOf(a.round) - ROUND_ORDER.indexOf(b.round)
+      return ri !== 0 ? ri : a.slot.localeCompare(b.slot)
+    })
+
+    // 5. Summary
+    const koPoints  = breakdown.reduce((s, r) => s + r.points, 0)
+    const correct   = breakdown.filter(r => r.status === 'correct').length
+    const incorrect = breakdown.filter(r => r.status === 'incorrect').length
+    const pending   = breakdown.filter(r => r.status === 'pending').length
+    const noPick    = breakdown.filter(r => r.status === 'no_pick').length
+
+    return res.json({
+      breakdown,
+      summary: { koPoints, correct, incorrect, pending, noPick, total: breakdown.length }
+    })
+  } catch (err) {
+    console.error('[user-ko-breakdown]', err.message)
+    return res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── POST /api/create-or-load-user ───────────────────────────────────────────
 // Creates user if not exists, loads if already exists.
 // Returns { userId, email, username, paid } regardless of paid status.

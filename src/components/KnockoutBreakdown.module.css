@@ -1,0 +1,235 @@
+/* ── CONTAINER ─────────────────────────────────────────────────── */
+.container {
+  background: var(--black-surface);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+/* ── HEADER (clickable) ────────────────────────────────────────── */
+.header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(201, 168, 76, 0.06);
+  border: none;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.header:hover { background: rgba(201, 168, 76, 0.09); }
+
+.headerLeft { display: flex; align-items: baseline; gap: 12px; }
+
+.headerTitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.headerSub {
+  font-size: 12px;
+  color: var(--white-muted);
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+.chevron {
+  font-size: 10px;
+  color: var(--gold-dim);
+}
+
+/* ── SUMMARY CARDS ─────────────────────────────────────────────── */
+.summaryRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.card {
+  padding: 14px 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.card:last-child { border-right: none; }
+
+.cardNum {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--white-dim);
+}
+
+.cardLabel {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white-muted);
+}
+
+/* Card color variants */
+.cardTotal   .cardNum { color: var(--gold-bright); }
+.cardCorrect .cardNum { color: #6bca80; }
+.cardPending .cardNum { color: var(--white-muted); }
+.cardIncorrect .cardNum { color: rgba(220, 90, 90, 0.8); }
+
+/* ── ROUNDS ────────────────────────────────────────────────────── */
+.rounds {
+  display: flex;
+  flex-direction: column;
+}
+
+.roundBlock {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.roundBlock:last-child { border-bottom: none; }
+
+.roundHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.roundLabel {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+
+.roundSummary {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--white-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ── BREAKDOWN ROW ─────────────────────────────────────────────── */
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  transition: background 0.12s;
+}
+.row:last-child { border-bottom: none; }
+.row:hover { background: rgba(255, 255, 255, 0.02); }
+
+/* Row status tints */
+.row_correct   { border-left: 2px solid rgba(80, 180, 100, 0.5); }
+.row_incorrect { border-left: 2px solid rgba(200, 60, 60, 0.4); }
+.row_pending   { border-left: 2px solid rgba(201, 168, 76, 0.25); }
+.row_noPick    { border-left: 2px solid rgba(255, 255, 255, 0.06); opacity: 0.6; }
+
+/* Match info */
+.rowMatch { display: flex; flex-direction: column; gap: 2px; }
+.rowSlot {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(201, 168, 76, 0.35);
+}
+.rowMatchup {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white-dim);
+  letter-spacing: 0.02em;
+}
+.rowVs { color: var(--white-muted); font-weight: 400; margin: 0 4px; }
+
+/* Pick columns */
+.rowPick, .rowActual { display: flex; flex-direction: column; gap: 2px; }
+
+.rowPickLabel {
+  font-size: 9px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--white-muted);
+}
+
+.rowPickValue {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white-dim);
+}
+.rowPickNone { color: var(--white-muted); font-style: italic; font-weight: 400; }
+
+.rowActualValue {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+/* Result column */
+.rowResult {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  min-width: 80px;
+  text-align: right;
+}
+
+.rowIcon {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+.icon_correct   { color: #6bca80; }
+.icon_incorrect { color: rgba(200, 80, 80, 0.8); }
+.icon_pending   { color: var(--gold-dim); }
+.icon_noPick    { color: var(--white-muted); }
+
+.rowPts {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.pts_correct   { color: #6bca80; }
+.pts_incorrect { color: rgba(200, 80, 80, 0.7); font-weight: 600; }
+.pts_pending   { color: var(--gold-dim); font-size: 11px; font-weight: 600; }
+.pts_noPick    { color: var(--white-muted); }
+
+/* ── NOTE ──────────────────────────────────────────────────────── */
+.note {
+  font-size: 11px;
+  color: var(--white-muted);
+  font-style: italic;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .summaryRow { grid-template-columns: repeat(2, 1fr); }
+  .row { grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 6px; }
+  .rowPick, .rowActual { display: none; } /* show in expanded view */
+  .rowMatch { grid-column: 1; }
+  .rowResult { grid-column: 2; grid-row: 1; }
+}

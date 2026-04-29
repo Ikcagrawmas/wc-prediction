@@ -1,10 +1,11 @@
-$source = "C:\Users\xxphg\Downloads\wc-prediction-phase9\wc-prediction"
+$source = "C:\Users\xxphg\Downloads\wc-prediction-phase9-1.tar\wc-prediction-phase9-1\wc-prediction"
 $destination = "C:\Users\xxphg\Downloads\wc-prediction-clean"
 
-Write-Host "Copying Phase 9 files..."
+Write-Host "Installing update..."
 
-Copy-Item "$source\src\*" "$destination\src\" -Recurse -Force
-Copy-Item "$source\server\*" "$destination\server\" -Recurse -Force
-Copy-Item "$source\supabase\*" "$destination\supabase\" -Recurse -Force
+Copy-Item "$source\src" -Destination "$destination\src" -Recurse -Force
+Copy-Item "$source\server" -Destination "$destination\server" -Recurse -Force
+Copy-Item "$source\public" -Destination "$destination\public" -Recurse -Force
+Copy-Item "$source\package.json" -Destination "$destination\package.json" -Force
 
-Write-Host "Done. Restart your app now."
+Write-Host "Update installed successfully."

@@ -15,6 +15,7 @@ import MatchScoreInput from '../components/MatchScoreInput'
 import GroupStandingsTable from '../components/GroupStandingsTable'
 import KnockoutBracket from '../components/KnockoutBracket'
 import BonusPredictions from '../components/BonusPredictions'
+import KnockoutBreakdown from '../components/KnockoutBreakdown'
 import ScoringGuide from '../components/ScoringGuide'
 import PaymentBanner from '../components/PaymentBanner'
 import ScoreSummaryPanel from '../components/ScoreSummaryPanel'
@@ -296,6 +297,7 @@ export default function PredictionsPage() {
       {/* BRACKET */}
       {activeTab === 'bracket' && (
         <div className={styles.content}>
+          <KnockoutBreakdown userId={userId} />
           <ScoringGuide tab="bracket" />
           <div className={styles.bracketIntro}>
             <div className={styles.bracketIntroText}>
