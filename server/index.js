@@ -4,7 +4,7 @@
 // Prod: serves built dist/ on PORT env var.
 
 import express from 'express'
-import { scoreMatchPredictions, rebuildUserScores } from './scoring.js'
+import { scoreMatchPredictions, rebuildUserScores, scoreKnockoutSlot, rebuildKnockoutPoints, scoreBonusPredictions, KO_POINTS } from './scoring.js'
 import cors from 'cors'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
@@ -598,6 +598,187 @@ app.get('/api/user-stats', async (req, res) => {
   }
 })
 
+// ─── GET /api/admin/knockout-state ───────────────────────────────────────────
+// Returns: actual group standings (computed from match results) + all KO results entered so far
+app.get('/api/admin/knockout-state', requireAdmin, async (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  try {
+    // 1. Get all completed group matches with actual scores
+    const { data: matches, error: mErr } = await serviceClient
+      .from('matches').select('id, match_number, stage, group_id, home_team_id, away_team_id, actual_home_score, actual_away_score, completed')
+      .eq('stage', 'group').eq('completed', true)
+    if (mErr) throw mErr
+
+    // 2. Get teams and groups for name resolution
+    const { data: teams }  = await serviceClient.from('teams').select('id, name, group_id, seed_position')
+    const { data: groups } = await serviceClient.from('groups').select('id, name')
+    const teamById   = {}; for (const t of (teams||[])) teamById[t.id] = t
+    const groupById  = {}; for (const g of (groups||[])) groupById[g.id] = g.name
+
+    // 3. Compute actual group standings from real results
+    const standingsMap = {}  // groupName → { teamName → stats }
+    for (const t of (teams||[])) {
+      const gName = groupById[t.group_id]
+      if (!gName) continue
+      if (!standingsMap[gName]) standingsMap[gName] = {}
+      standingsMap[gName][t.name] = { team: t.name, seed: t.seed_position, played:0, wins:0, draws:0, losses:0, gf:0, ga:0, gd:0, pts:0 }
+    }
+
+    for (const m of (matches||[])) {
+      const home = teamById[m.home_team_id]; const away = teamById[m.away_team_id]
+      if (!home || !away) continue
+      const gName = groupById[home.group_id]
+      if (!gName || !standingsMap[gName]) continue
+      const hS = standingsMap[gName][home.name]; const aS = standingsMap[gName][away.name]
+      if (!hS || !aS) continue
+      const hG = m.actual_home_score, aG = m.actual_away_score
+      hS.played++; aS.played++; hS.gf+=hG; hS.ga+=aG; aS.gf+=aG; aS.ga+=hG
+      hS.gd = hS.gf-hS.ga; aS.gd = aS.gf-aS.ga
+      if (hG > aG) { hS.wins++; hS.pts+=3; aS.losses++ }
+      else if (hG < aG) { aS.wins++; aS.pts+=3; hS.losses++ }
+      else { hS.draws++; aS.draws++; hS.pts++; aS.pts++ }
+    }
+
+    // Sort each group's standings
+    const sortedStandings = {}
+    for (const [gName, teamsObj] of Object.entries(standingsMap)) {
+      sortedStandings[gName] = Object.values(teamsObj)
+        .sort((a,b) => b.pts-a.pts || b.gd-a.gd || b.gf-a.gf || a.seed-b.seed)
+        .map((t,i) => ({ ...t, rank: i+1 }))
+    }
+
+    // 4. Get existing KO results
+    const { data: koResults } = await serviceClient.from('actual_knockout_results').select('*')
+    const koBySlot = {}
+    for (const r of (koResults||[])) koBySlot[`${r.round}|${r.slot}`] = r
+
+    return res.json({ standings: sortedStandings, koResults: koResults || [] })
+  } catch (err) {
+    console.error('[admin/knockout-state]', err.message)
+    return res.status(500).json({ error: err.message })
+  }
+})
+
+// ─── POST /api/admin/knockout-result ─────────────────────────────────────────
+// Admin saves the actual winner for a KO slot, triggers bracket-wide scoring
+app.post('/api/admin/knockout-result', requireAdmin, async (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  const { round, slot, winner_name, home_team, away_team } = req.body || {}
+
+  if (!round || !slot || !winner_name) {
+    return res.status(400).json({ error: 'round, slot, and winner_name are required' })
+  }
+
+  console.log(`[admin/ko-result] ${round}|${slot} → winner: ${winner_name}`)
+
+  try {
+    // 1. Save/update the actual result
+    const { error: saveErr } = await serviceClient
+      .from('actual_knockout_results')
+      .upsert({ round, slot, winner_name, home_team: home_team||null, away_team: away_team||null }, { onConflict: 'round,slot' })
+    if (saveErr) throw saveErr
+
+    // 2. Score all user picks for this slot
+    const { scoredRows, userIds } = await scoreKnockoutSlot(round, slot, winner_name, serviceClient)
+
+    // 3. Upsert knockout_scores
+    if (scoredRows.length) {
+      const { error: ksErr } = await serviceClient
+        .from('knockout_scores').upsert(scoredRows, { onConflict: 'user_id,round,slot' })
+      if (ksErr) throw ksErr
+    }
+
+    // 4. Rebuild knockout_points in scores table
+    await rebuildKnockoutPoints(userIds, serviceClient)
+
+    const correct = scoredRows.filter(r => r.correct).length
+    console.log(`[admin/ko-result] ✓ ${scoredRows.length} picks scored, ${correct} correct (${KO_POINTS[round]||0} pts each)`)
+
+    return res.json({
+      success: true,
+      picks_scored: scoredRows.length,
+      correct_picks: correct,
+      points_per_correct: KO_POINTS[round] || 0,
+    })
+  } catch (err) {
+    console.error('[admin/ko-result]', err.message)
+    return res.status(500).json({ error: err.message })
+  }
+})
+
+// ─── GET /api/admin/bonus-answers ────────────────────────────────────────────
+app.get('/api/admin/bonus-answers', requireAdmin, async (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  try {
+    const { data } = await serviceClient.from('actual_bonus_answers').select('*').order('entered_at', { ascending: false }).limit(1)
+    return res.json({ answers: data?.[0] || null })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+})
+
+// ─── POST /api/admin/bonus-answers ───────────────────────────────────────────
+// Admin saves actual bonus answers and triggers bonus scoring for all users
+app.post('/api/admin/bonus-answers', requireAdmin, async (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  const { golden_boot_player, most_yellow_cards_team, most_red_cards_team, most_clean_sheets_team } = req.body || {}
+
+  console.log('[admin/bonus-answers] saving actual answers')
+
+  try {
+    // Check if row exists
+    const { data: existing } = await serviceClient.from('actual_bonus_answers').select('id').limit(1)
+    const answers = { golden_boot_player: golden_boot_player||null, most_yellow_cards_team: most_yellow_cards_team||null, most_red_cards_team: most_red_cards_team||null, most_clean_sheets_team: most_clean_sheets_team||null }
+
+    if (existing?.[0]?.id) {
+      await serviceClient.from('actual_bonus_answers').update(answers).eq('id', existing[0].id)
+    } else {
+      await serviceClient.from('actual_bonus_answers').insert(answers)
+    }
+
+    // Score all users
+    const scored = await scoreBonusPredictions(answers, serviceClient)
+    console.log(`[admin/bonus-answers] ✓ scored ${scored} users`)
+
+    return res.json({ success: true, users_scored: scored })
+  } catch (err) {
+    console.error('[admin/bonus-answers]', err.message)
+    return res.status(500).json({ error: err.message })
+  }
+})
+
+// ─── GET /api/admin/scoring-summary ──────────────────────────────────────────
+app.get('/api/admin/scoring-summary', requireAdmin, async (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  try {
+    const { count: paidUsers  } = await serviceClient.from('users').select('*',{count:'exact',head:true}).eq('paid',true)
+    const { count: groupDone  } = await serviceClient.from('matches').select('*',{count:'exact',head:true}).eq('stage','group').eq('completed',true)
+    const { count: koDone     } = await serviceClient.from('actual_knockout_results').select('*',{count:'exact',head:true}).not('winner_name','is',null)
+    const { data:  bonusRow   } = await serviceClient.from('actual_bonus_answers').select('*').limit(1)
+    const { count: scoredPred } = await serviceClient.from('prediction_scores').select('*',{count:'exact',head:true})
+    const { count: scoredKO   } = await serviceClient.from('knockout_scores').select('*',{count:'exact',head:true})
+    const { count: scoredBonus} = await serviceClient.from('bonus_scores').select('*',{count:'exact',head:true})
+
+    const bonus = bonusRow?.[0] || {}
+    const bonusFieldsFilled = [bonus.golden_boot_player, bonus.most_yellow_cards_team, bonus.most_red_cards_team, bonus.most_clean_sheets_team].filter(Boolean).length
+
+    return res.json({
+      paid_users:         paidUsers || 0,
+      group_matches_done: groupDone || 0,
+      group_matches_total: 72,
+      ko_slots_done:      koDone || 0,
+      ko_slots_total:     31,     // 16+8+4+2+1
+      bonus_fields_done:  bonusFieldsFilled,
+      bonus_fields_total: 4,
+      prediction_scores_rows: scoredPred || 0,
+      knockout_scores_rows:   scoredKO   || 0,
+      bonus_scores_rows:      scoredBonus|| 0,
+    })
+  } catch (err) {
+    return res.status(500).json({ error: err.message })
+  }
+})
+
 // ─── POST /api/create-or-load-user ───────────────────────────────────────────
 // Creates user if not exists, loads if already exists.
 // Returns { userId, email, username, paid } regardless of paid status.
@@ -733,7 +914,7 @@ async function handleWebhook(req, res) {
 if (!IS_DEV) {
   const distPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist')
   app.use(express.static(distPath))
-  app.use((req, res) => {
+  app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'API route not found' })
     }
@@ -742,7 +923,7 @@ if (!IS_DEV) {
 } else {
   // In dev, any non-API route hit on Express means the request didn't go through Vite.
   // Return a helpful JSON error so it never silently returns HTML.
-  app.use((req, res) => {
+  app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: `API route not found: ${req.path}` })
     }
