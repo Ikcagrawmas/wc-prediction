@@ -914,7 +914,7 @@ async function handleWebhook(req, res) {
 if (!IS_DEV) {
   const distPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist')
   app.use(express.static(distPath))
-  app.get('*', (req, res) => {
+  app.use((req, res) => {
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'API route not found' })
     }
@@ -923,7 +923,7 @@ if (!IS_DEV) {
 } else {
   // In dev, any non-API route hit on Express means the request didn't go through Vite.
   // Return a helpful JSON error so it never silently returns HTML.
-  app.get('*', (req, res) => {
+  app.use((req, res) => {
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: `API route not found: ${req.path}` })
     }
